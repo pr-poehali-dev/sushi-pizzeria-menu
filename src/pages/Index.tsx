@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -94,6 +95,7 @@ const mockRestaurants: Restaurant[] = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCuisine, setSelectedCuisine] = useState('all');
@@ -320,7 +322,11 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <Button className="w-full rounded-xl" size="lg">
+                    <Button 
+                      className="w-full rounded-xl" 
+                      size="lg"
+                      onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                    >
                       <Icon name="UtensilsCrossed" size={18} className="mr-2" />
                       Посмотреть меню
                     </Button>
