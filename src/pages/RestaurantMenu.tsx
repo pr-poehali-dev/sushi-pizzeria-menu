@@ -211,6 +211,27 @@ const RestaurantMenu = () => {
     return sum + (item?.price || 0) * count;
   }, 0);
 
+  const handleCheckout = () => {
+    const cartItems = Object.entries(cart).map(([itemId, quantity]) => {
+      const item = restaurant.menu.find(m => m.id === parseInt(itemId));
+      return {
+        id: parseInt(itemId),
+        name: item?.name || '',
+        price: item?.price || 0,
+        quantity,
+        image: item?.image || '',
+      };
+    });
+
+    navigate('/checkout', {
+      state: {
+        items: cartItems,
+        restaurantName: restaurant.name,
+        subtotal: totalPrice,
+      },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
@@ -369,7 +390,7 @@ const RestaurantMenu = () => {
                   {totalPrice} ₽
                 </div>
               </div>
-              <Button size="lg" className="rounded-xl px-8">
+              <Button size="lg" className="rounded-xl px-8" onClick={handleCheckout}>
                 <Icon name="ShoppingCart" size={20} className="mr-2" />
                 Оформить заказ
               </Button>
