@@ -12,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface Restaurant {
   id: number;
@@ -23,6 +30,7 @@ interface Restaurant {
   image: string;
   isFavorite: boolean;
   popularDishes: string[];
+  cities: string[];
 }
 
 const mockRestaurants: Restaurant[] = [
@@ -36,6 +44,7 @@ const mockRestaurants: Restaurant[] = [
     image: '🍕',
     isFavorite: false,
     popularDishes: ['Пицца Маргарита', 'Карбонара', 'Тирамису'],
+    cities: ['Москва', 'Санкт-Петербург', 'Казань'],
   },
   {
     id: 2,
@@ -47,6 +56,7 @@ const mockRestaurants: Restaurant[] = [
     image: '🍣',
     isFavorite: false,
     popularDishes: ['Филадельфия', 'Калифорния', 'Сашими сет'],
+    cities: ['Москва', 'Санкт-Петербург'],
   },
   {
     id: 3,
@@ -58,6 +68,7 @@ const mockRestaurants: Restaurant[] = [
     image: '🍕',
     isFavorite: false,
     popularDishes: ['Пепперони', '4 сыра', 'Дьябола'],
+    cities: ['Москва', 'Новосибирск', 'Екатеринбург'],
   },
   {
     id: 4,
@@ -69,6 +80,7 @@ const mockRestaurants: Restaurant[] = [
     image: '🍱',
     isFavorite: false,
     popularDishes: ['Рамен', 'Темпура', 'Унаги маки'],
+    cities: ['Санкт-Петербург', 'Казань'],
   },
   {
     id: 5,
@@ -80,6 +92,7 @@ const mockRestaurants: Restaurant[] = [
     image: '🍝',
     isFavorite: false,
     popularDishes: ['Болоньезе', 'Аматричана', 'Панна котта'],
+    cities: ['Москва', 'Екатеринбург', 'Нижний Новгород'],
   },
   {
     id: 6,
@@ -91,7 +104,17 @@ const mockRestaurants: Restaurant[] = [
     image: '🍣',
     isFavorite: false,
     popularDishes: ['Нигири сет', 'Гункан маки', 'Соба'],
+    cities: ['Москва', 'Новосибирск'],
   },
+];
+
+const CITIES = [
+  'Москва',
+  'Санкт-Петербург',
+  'Новосибирск',
+  'Екатеринбург',
+  'Казань',
+  'Нижний Новгород',
 ];
 
 const Index = () => {
@@ -102,6 +125,8 @@ const Index = () => {
   const [selectedPrice, setSelectedPrice] = useState('all');
   const [selectedRating, setSelectedRating] = useState('all');
   const [activeTab, setActiveTab] = useState('home');
+  const [selectedCity, setSelectedCity] = useState('Москва');
+  const [cityDialogOpen, setCityDialogOpen] = useState(false);
 
   const toggleFavorite = (id: number) => {
     setRestaurants(
@@ -134,12 +159,15 @@ const Index = () => {
       activeTab === 'home' ||
       (activeTab === 'favorites' && restaurant.isFavorite);
 
+    const matchesCity = restaurant.cities.includes(selectedCity);
+
     return (
       matchesSearch &&
       matchesCuisine &&
       matchesPrice &&
       matchesRating &&
-      matchesTab
+      matchesTab &&
+      matchesCity
     );
   });
 
@@ -152,7 +180,66 @@ const Index = () => {
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-2xl">
                 🍕
               </div>
-              <h1 className="text-2xl font-bold text-foreground">MenuHub</h1>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">MenuHub</h1>
+                <Dialog open={cityDialogOpen} onOpenChange={setCityDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button 
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Icon name="MapPin" size={14} />
+                      <span>{selectedCity}</span>
+                      <Icon name="ChevronDown" size={14} />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Icon name="MapPin" size={20} />
+                        Выберите город
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-2 py-4">
+                      {CITIES.map((city) => {
+                        const restaurantsInCity = mockRestaurants.filter(r => 
+                          r.cities.includes(city)
+                        ).length;
+                        
+                        return (
+                          <button
+                            key={city}
+                            onClick={() => {
+                              setSelectedCity(city);
+                              setCityDialogOpen(false);
+                            }}
+                            className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                              selectedCity === city
+                                ? 'bg-primary/10 border-primary text-primary font-medium'
+                                : 'border-border hover:bg-secondary'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                selectedCity === city ? 'bg-primary/20' : 'bg-secondary'
+                              }`}>
+                                <Icon 
+                                  name="MapPin" 
+                                  size={20} 
+                                  className={selectedCity === city ? 'text-primary' : 'text-muted-foreground'}
+                                />
+                              </div>
+                              <span className="text-left font-medium">{city}</span>
+                            </div>
+                            <Badge variant={restaurantsInCity > 0 ? 'default' : 'secondary'}>
+                              {restaurantsInCity} {restaurantsInCity === 1 ? 'ресторан' : restaurantsInCity < 5 ? 'ресторана' : 'ресторанов'}
+                            </Badge>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
             <Button variant="outline" size="icon" className="rounded-full">
               <Icon name="User" size={20} />
@@ -242,13 +329,21 @@ const Index = () => {
 
         {filteredRestaurants.length === 0 ? (
           <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
+            <div className="text-6xl mb-4">🏙️</div>
             <h2 className="text-xl font-semibold text-foreground mb-2">
-              Ничего не найдено
+              В городе {selectedCity} нет доступных ресторанов
             </h2>
-            <p className="text-muted-foreground">
-              Попробуйте изменить фильтры или поисковый запрос
+            <p className="text-muted-foreground mb-4">
+              Попробуйте выбрать другой город или изменить фильтры
             </p>
+            <Button 
+              variant="outline" 
+              onClick={() => setCityDialogOpen(true)}
+              className="rounded-xl"
+            >
+              <Icon name="MapPin" size={18} className="mr-2" />
+              Выбрать другой город
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -302,9 +397,15 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <Badge variant="outline" className="mb-3 rounded-full">
-                      {restaurant.cuisine}
-                    </Badge>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="rounded-full">
+                        {restaurant.cuisine}
+                      </Badge>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Icon name="MapPin" size={12} />
+                        <span>{restaurant.cities.length} {restaurant.cities.length === 1 ? 'город' : restaurant.cities.length < 5 ? 'города' : 'городов'}</span>
+                      </div>
+                    </div>
 
                     <div className="mb-4">
                       <p className="text-xs text-muted-foreground mb-2">
